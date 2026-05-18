@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Add claim — Daesh Claims Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body class="form-page">
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="masthead-left">
+      <div class="eyebrow">Data entry</div>
+      <h1 class="title">Add <span class="title-em">claim</span></h1>
+      <p class="lede">Fill the form below. On submit, you'll get a row ready to paste into the Excel tracker plus a JSON snippet for backup or alternative workflows. The tracker isn't updated until you save the Excel and push the change to GitHub.</p>
+    </div>
+    <div class="masthead-right">
+      <a class="add-btn" href="index.html" style="background: transparent; border: 1px solid var(--accent); color: var(--accent);">← Back to dashboard</a>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<div class="form-card">
+  <div id="form-flash" class="flash"></div>
+
+  <form id="claim-form" autocomplete="off">
+
+    <div class="form-grid">
+      <div class="field">
+        <label for="event_date">Event date</label>
+        <input type="date" id="event_date" required>
+      </div>
+      <div class="field">
+        <label for="claim_date">Claim date</label>
+        <input type="date" id="claim_date" required>
+        <span class="field-hint" id="retro-hint"></span>
+      </div>
+
+      <div class="field">
+        <label for="actor">Actor</label>
+        <select id="actor" required></select>
+      </div>
+      <div class="field">
+        <label for="country">Country</label>
+        <select id="country" required></select>
+      </div>
+
+      <div class="field full">
+        <label for="location">Location details</label>
+        <input type="text" id="location" placeholder="e.g. Muchanga, Ituri" required>
+      </div>
+
+      <div class="field full">
+        <label>Event types (up to 5)</label>
+        <div id="event-types-slots"></div>
+      </div>
+
+      <div class="field">
+        <label>Target types (up to 3)</label>
+        <div id="target-types-slots"></div>
+      </div>
+
+      <div class="field">
+        <label>Weapon types (up to 5)</label>
+        <div id="weapon-types-slots"></div>
+      </div>
+
+      <div class="field">
+        <label for="fatalities">Fatalities</label>
+        <input type="number" id="fatalities" min="0" step="1" value="0">
+      </div>
+
+      <div class="field">
+        <label for="other">Other / notes</label>
+        <input type="text" id="other" placeholder="Optional">
+      </div>
+
+      <div class="field full">
+        <label for="summary">Event summary</label>
+        <textarea id="summary" required placeholder="e.g. On Monday, ISWAP attacked the village of Kauthama, Borno state, capturing a Christian fighter and burning a church and 15 Christian homes."></textarea>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="primary-btn">Generate row</button>
+      <button type="reset" class="ghost-btn" id="form-reset">Reset</button>
+      <span class="field-hint" style="margin-left: auto;">All fields except 'other' are required</span>
+    </div>
+
+  </form>
+
+  <div id="output" class="output-card">
+    <h3>1. Paste this into the Excel "Claims Log" sheet</h3>
+    <p>Open <code>data/Daesh_Claims_Tracker.xlsx</code>. Go to the first empty row in <strong>Claims Log</strong>. Click cell <strong>B</strong> on that row, then paste. Columns A (No.) and D (Retroactive) will fill in automatically.</p>
+    <div class="output-row" id="output-row"></div>
+    <div class="copy-actions">
+      <button type="button" id="copy-row">Copy row (tab-separated)</button>
+    </div>
+
+    <h3 style="margin-top: 22px;">2. JSON entry (backup / alternative)</h3>
+    <p>Same data as a JSON object — useful if you ever want to bypass Excel and append directly to <code>data/claims.json</code>.</p>
+    <div class="output-row" id="output-json"></div>
+    <div class="copy-actions">
+      <button type="button" id="copy-json">Copy JSON</button>
+    </div>
+
+    <h3 style="margin-top: 22px;">3. Then publish</h3>
+    <p>Save the Excel file. Commit and push. The GitHub Action rebuilds <code>claims.json</code> and redeploys the site within ~1 minute.</p>
+  </div>
+</div>
+
+</main>
+
+<footer class="site-foot">
+  <div class="foot-inner">
+    <span>Daesh Claims Tracker · Add claim</span>
+    <a href="index.html" style="color: var(--muted);">Dashboard →</a>
+  </div>
+</footer>
+
+<script src="assets/add.js"></script>
+</body>
+</html>

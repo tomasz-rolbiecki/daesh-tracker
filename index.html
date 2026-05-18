@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Daesh / Islamic State claims tracker. Manually curated open-source data, weekly updates.">
+<title>Daesh Claims Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="masthead-left">
+      <div class="eyebrow">Open-Source Intelligence · Weekly</div>
+      <h1 class="title">Daesh Claims <span class="title-em">Tracker</span></h1>
+      <p class="lede">A manually curated log of Daesh / Islamic State attack claims, organised by actor, country, and event type. Data drawn from public claim feeds. Updates pushed via Excel.</p>
+    </div>
+    <div class="masthead-right">
+      <div class="meta-row"><span class="meta-label">Last update</span><span class="meta-val" id="meta-updated">—</span></div>
+      <div class="meta-row"><span class="meta-label">Total claims</span><span class="meta-val mono" id="meta-total">—</span></div>
+      <div class="meta-row"><span class="meta-label">Coverage</span><span class="meta-val mono" id="meta-range">—</span></div>
+      <div class="meta-row">
+        <a class="add-btn" href="add.html">+ Add claim</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <section class="kpis">
+    <div class="kpi">
+      <div class="kpi-label">Total claims</div>
+      <div class="kpi-val" id="kpi-total">—</div>
+      <div class="kpi-sub" id="kpi-total-sub">—</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Retroactive</div>
+      <div class="kpi-val" id="kpi-retro">—</div>
+      <div class="kpi-sub" id="kpi-retro-sub">—</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Fatalities</div>
+      <div class="kpi-val" id="kpi-fatalities">—</div>
+      <div class="kpi-sub" id="kpi-fatalities-sub">—</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Countries</div>
+      <div class="kpi-val" id="kpi-countries">—</div>
+      <div class="kpi-sub" id="kpi-countries-sub">distinct</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Actors</div>
+      <div class="kpi-val" id="kpi-actors">—</div>
+      <div class="kpi-sub" id="kpi-actors-sub">distinct</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Peak month</div>
+      <div class="kpi-val" id="kpi-peak">—</div>
+      <div class="kpi-sub" id="kpi-peak-sub">—</div>
+    </div>
+  </section>
+
+  <section class="filters-bar" aria-label="Filters">
+    <div class="filter-group">
+      <label for="f-month-from">Month from</label>
+      <select id="f-month-from"></select>
+    </div>
+    <div class="filter-group">
+      <label for="f-month-to">Month to</label>
+      <select id="f-month-to"></select>
+    </div>
+    <div class="filter-group">
+      <label for="f-actor">Actor</label>
+      <select id="f-actor" multiple size="1"></select>
+    </div>
+    <div class="filter-group">
+      <label for="f-country">Country</label>
+      <select id="f-country" multiple size="1"></select>
+    </div>
+    <div class="filter-group">
+      <label for="f-retro">Type</label>
+      <select id="f-retro">
+        <option value="all">All</option>
+        <option value="current">Current-month only</option>
+        <option value="retro">Retroactive only</option>
+      </select>
+    </div>
+    <button id="f-reset" type="button" class="reset-btn">Reset</button>
+    <div class="filter-status" id="filter-status">Showing all</div>
+  </section>
+
+  <section class="chart-row chart-row-full">
+    <div class="chart-card">
+      <div class="chart-head">
+        <h2>Claims by month</h2>
+        <div class="chart-sub" id="chart-month-sub">Stacked by actor. Click a month to filter.</div>
+      </div>
+      <div class="chart-body chart-body-tall"><canvas id="chart-month"></canvas></div>
+    </div>
+  </section>
+
+  <section class="chart-row">
+    <div class="chart-card">
+      <div class="chart-head">
+        <h2>By actor</h2>
+        <div class="chart-sub">Claim count, filtered view</div>
+      </div>
+      <div class="chart-body"><canvas id="chart-actor"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-head">
+        <h2>By country</h2>
+        <div class="chart-sub">Claim count, filtered view</div>
+      </div>
+      <div class="chart-body"><canvas id="chart-country"></canvas></div>
+    </div>
+  </section>
+
+  <section class="chart-row">
+    <div class="chart-card">
+      <div class="chart-head">
+        <h2>Event types</h2>
+        <div class="chart-sub">Instance count across all event-type slots</div>
+      </div>
+      <div class="chart-body"><canvas id="chart-event"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-head">
+        <h2>Target types</h2>
+        <div class="chart-sub">Instance count across all target-type slots</div>
+      </div>
+      <div class="chart-body"><canvas id="chart-target"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-head">
+        <h2>Weapons</h2>
+        <div class="chart-sub">Instance count across all weapon-type slots</div>
+      </div>
+      <div class="chart-body"><canvas id="chart-weapon"></canvas></div>
+    </div>
+  </section>
+
+  <section class="chart-row chart-row-full">
+    <div class="chart-card">
+      <div class="chart-head">
+        <h2>Fatalities by month</h2>
+        <div class="chart-sub" id="chart-fat-sub">Reported fatalities, summed by claim month</div>
+      </div>
+      <div class="chart-body chart-body-mid"><canvas id="chart-fatalities"></canvas></div>
+    </div>
+  </section>
+
+  <section class="table-section">
+    <div class="table-head">
+      <h2>Claims log</h2>
+      <div class="table-tools">
+        <input type="search" id="table-search" placeholder="Search location, summary, country…" />
+        <span class="table-count mono" id="table-count">—</span>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table id="claims-table">
+        <thead>
+          <tr>
+            <th data-sort="claim_date">Claim date</th>
+            <th data-sort="event_date">Event date</th>
+            <th>Retro</th>
+            <th data-sort="actor">Actor</th>
+            <th data-sort="country">Country</th>
+            <th>Location</th>
+            <th>Events</th>
+            <th>Targets</th>
+            <th>Weapons</th>
+            <th data-sort="fatalities" class="right">Fatalities</th>
+            <th>Summary</th>
+          </tr>
+        </thead>
+        <tbody id="claims-tbody"></tbody>
+      </table>
+    </div>
+    <div class="table-pager">
+      <button id="pg-prev" type="button">← Prev</button>
+      <span class="mono" id="pg-info">—</span>
+      <button id="pg-next" type="button">Next →</button>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-foot">
+  <div class="foot-inner">
+    <span>Daesh Claims Tracker · Manually curated · Source: Excel → JSON via GitHub Action</span>
+    <span class="mono" id="foot-build">—</span>
+  </div>
+</footer>
+
+<script src="assets/app.js"></script>
+</body>
+</html>
